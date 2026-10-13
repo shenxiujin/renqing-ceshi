@@ -104,7 +104,7 @@
         <input class="pwd-input" id="pwdInput" type="text" placeholder="请输入测评密码" autocomplete="off">
         <button class="btn btn-primary" onclick="checkPwd()">开始测试</button>
         <div class="err" id="pwdErr"></div>
-        <div class="demo-tip">演示密码：<b>renshi388</b>（每个密码可测 3 次）</div>
+        <div class="demo-tip">密码在店铺购买后获取 · 每个密码可测 3 次</div>
       </div>
     </div>
   </section>
@@ -250,22 +250,39 @@ const DIMS = [
   { key: "E", label: "自我 ← 共情", max: 36 }
 ];
 
-const DEMO_PASSWORDS = ["renshi388", "duanwei888", "ceshi2026"];
+// ---------- Supabase 配置（部署前替换为你项目真实值） ----------
+const SUPABASE_URL = "https://czmmzlrqnhuaqjhouae.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6bW16bHJxbmh1YXVxamhvdWFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4NjcxOTUsImV4cCI6MjEwNzQ0MzE5NX0.VHAApxByGrBtTeZup70Ws0P5wAjEBaGihrftmvy2t68";
 
 let state = { gender: "", current: 0, answers: new Array(12).fill(-1), pwd: "" };
 
-// ---------- 密码 ----------
-function getUsage() { try { return JSON.parse(localStorage.getItem("ceshi_usage") || "{}"); } catch (e) { return {}; } }
-function incUsage(pwd) { const u = getUsage(); u[pwd] = (u[pwd] || 0) + 1; localStorage.setItem("ceshi_usage", JSON.stringify(u)); }
-function checkPwd() {
+// ---------- 密码（调用 Supabase 原子校验+扣减，每密码限 3 次） ----------
+async function consume(code) {
+  const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/consume_password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": "Bearer " + SUPABASE_ANON },
+    body: JSON.stringify({ p_code: code })
+  });
+  if (!res.ok) throw new Error("net");
+  return await res.json();
+}
+async function checkPwd() {
   const v = document.getElementById("pwdInput").value.trim();
   const err = document.getElementById("pwdErr");
   if (!v) { err.textContent = "请输入测评密码"; return; }
-  if (!DEMO_PASSWORDS.includes(v)) { err.textContent = "密码不正确，请核对后重试"; return; }
-  if ((getUsage()[v] || 0) >= 3) { err.textContent = "该密码已用完 3 次，请使用新密码"; return; }
-  state.pwd = v;
-  err.textContent = "";
-  show("gender");
+  err.textContent = "验证中…";
+  try {
+    const r = await consume(v);
+    if (!r || r.ok !== true) {
+      err.textContent = (r && r.reason === "exhausted") ? "该密码已用完 3 次，请使用新密码" : "密码不正确，请核对后重试";
+      return;
+    }
+    state.pwd = v;
+    err.textContent = "";
+    show("gender");
+  } catch (e) {
+    err.textContent = "网络异常，请稍后重试";
+  }
 }
 
 // ---------- 性别 ----------
@@ -279,7 +296,6 @@ function pickGender(el) {
 
 // ---------- 答题 ----------
 function startQuiz() {
-  incUsage(state.pwd);
   state.current = 0; state.answers = new Array(12).fill(-1);
   renderQ();
   show("quiz");
@@ -422,10 +438,11 @@ function saveImage() {
 function showPraise() { document.getElementById("praiseMask").classList.add("show"); }
 function hidePraise() { document.getElementById("praiseMask").classList.remove("show"); }
 function retest() {
-  state = { gender: "", current: 0, answers: new Array(12).fill(-1), pwd: "" };
-  document.getElementById("pwdInput").value = "";
+  const p = state.pwd;
+  state = { gender: "", current: 0, answers: new Array(12).fill(-1), pwd: p };
+  const inp = document.getElementById("pwdInput"); inp.value = p || "";
   document.getElementById("pwdErr").textContent = "";
-  document.querySelectorAll("#genderRow .g-pill").forEach(p => p.classList.remove("on"));
+  document.querySelectorAll("#genderRow .g-pill").forEach(x => x.classList.remove("on"));
   const btn = document.getElementById("genderNext"); btn.disabled = true; btn.style.opacity = ".5";
   show("pwd");
 }
