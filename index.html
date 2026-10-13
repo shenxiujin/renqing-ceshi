@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>人情世故段位测试 · 段位研究所</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --pink: #F56A8C;
+    --pink-soft: #F089A2;
+    --pink-bg: #FFF4F7;
+    --pink-pill: #FFE9EF;
+    --ink: #1A1A1A;
+    --sub: #8A8A8A;
+    --line: #F0F0F2;
+  }
+  html, body { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--pink-bg); color: var(--ink); }
+  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--pink-bg); position: relative; }
+  .screen { display: none; flex-direction: column; min-height: 100vh; padding: 24px 20px 32px; }
+  .screen.active { display: flex; }
+  .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .logo { font-size: 18px; font-weight: 700; color: var(--pink); }
+  .tag { font-size: 12px; color: var(--pink); background: var(--pink-pill); padding: 6px 12px; border-radius: 999px; }
+
+  /* password */
+  .hero { display: flex; flex-direction: column; gap: 16px; margin-top: 28px; }
+  .badge { align-self: flex-start; font-size: 13px; color: var(--pink-soft); background: #FFF0F3; padding: 8px 14px; border-radius: 999px; font-weight: 500; }
+  .h1 { font-size: 30px; font-weight: 700; line-height: 40px; }
+  .sub { font-size: 14px; color: var(--sub); line-height: 22px; }
+  .pwd-wrap { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .pwd-input { height: 52px; border-radius: 14px; background: #fff; border: 1px solid #FFE0E8; padding: 0 16px; font-size: 16px; color: var(--ink); }
+  .pwd-input::placeholder { color: #C9C9C9; }
+  .demo-tip { font-size: 12px; color: #B0B0B0; text-align: center; }
+  .demo-tip b { color: var(--pink-soft); }
+
+  .btn { height: 52px; border-radius: 26px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; border: none; }
+  .btn-primary { background: var(--pink); color: #fff; }
+  .btn-ghost { background: #fff; color: var(--pink); box-shadow: 0 4px 12px rgba(245,106,140,.06); }
+  .btn-soft { background: var(--pink-pill); color: var(--pink-soft); }
+  .err { color: #E5484D; font-size: 13px; text-align: center; min-height: 18px; }
+
+  /* gender */
+  .gender-row { display: flex; gap: 10px; margin-top: 16px; }
+  .g-pill { flex: 1; text-align: center; padding: 14px 0; border-radius: 999px; background: #fff; color: #3A3A3A; font-size: 14px; border: 1px solid #FFE0E8; }
+  .g-pill.on { background: var(--pink); color: #fff; border-color: var(--pink); }
+
+  /* quiz */
+  .q-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+  .q-count { font-weight: 600; }
+  .q-hint { font-size: 12px; color: #C0C0C0; }
+  .bar-bg { width: 100%; height: 8px; border-radius: 4px; background: var(--pink-pill); margin-top: 12px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--pink); border-radius: 4px; transition: width .25s; }
+  .q-title { font-size: 23px; font-weight: 700; line-height: 33px; margin: 22px 0 4px; }
+  .opts { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+  .opt { display: flex; align-items: center; gap: 12px; padding: 18px; border-radius: 18px; background: #fff; font-size: 15px; color: #3A3A3A; border: 2px solid transparent; }
+  .opt.on { border-color: var(--pink); background: #FFF0F3; color: var(--pink); font-weight: 600; }
+  .opt .k { width: 22px; height: 22px; border-radius: 50%; background: var(--pink-pill); color: var(--pink); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opt.on .k { background: var(--pink); color: #fff; }
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+  .nav .btn { flex: 1; height: 48px; font-size: 14px; }
+  .foot-tip { text-align: center; font-size: 12px; color: #C9C9C9; margin-top: 18px; }
+
+  /* result */
+  .rs-top { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rs-tag { font-size: 12px; color: var(--pink-soft); background: #FFF0F3; padding: 6px 12px; border-radius: 999px; }
+  .rs-name { font-size: 26px; font-weight: 700; }
+  .rs-sub { font-size: 13px; color: var(--sub); }
+  .card { background: #fff; border-radius: 20px; padding: 20px; margin-top: 14px; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .dim { margin-bottom: 16px; }
+  .dim:last-child { margin-bottom: 0; }
+  .dim-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+  .dim-head .l { color: #B0B0B0; }
+  .dim-head .r { color: var(--pink-soft); font-weight: 600; }
+  .dim-bar { width: 100%; height: 8px; border-radius: 4px; background: #F5F0F2; overflow: hidden; }
+  .dim-fill { height: 100%; background: var(--pink); border-radius: 4px; }
+  .insight { font-size: 14px; color: #5A5A5A; line-height: 24px; margin-top: 6px; }
+  .acts { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .acts .btn { width: 100%; }
+  .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; padding: 30px; z-index: 20; }
+  .modal-mask.show { display: flex; }
+  .modal { background: #fff; border-radius: 20px; padding: 26px 22px; max-width: 320px; text-align: center; }
+  .modal h4 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: #5A5A5A; line-height: 22px; margin-bottom: 18px; }
+  .toast { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,.8); color: #fff; font-size: 14px; padding: 12px 20px; border-radius: 12px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 30; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 屏1：密码门控 -->
+  <section class="screen active" id="pwd">
+    <div class="brand">
+      <div class="logo">段位研究所</div>
+      <div class="tag">已测 5.2w+</div>
+    </div>
+    <div class="hero">
+      <div class="badge">12题 · 3分钟 · 凭密码开启</div>
+      <div class="h1">你的人情世故，<br>到第几段位了？</div>
+      <div class="sub">不是情商测试。基于真实职场与生活情境，测出你在人情往来里的段位与盲区。</div>
+      <div class="pwd-wrap">
+        <input class="pwd-input" id="pwdInput" type="text" placeholder="请输入测评密码" autocomplete="off">
+        <button class="btn btn-primary" onclick="checkPwd()">开始测试</button>
+        <div class="err" id="pwdErr"></div>
+        <div class="demo-tip">演示密码：<b>renshi388</b>（每个密码可测 3 次）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 屏2：性别倾向 -->
+  <section class="screen" id="gender">
+    <div class="brand">
+      <div class="logo">段位研究所</div>
+      <div class="tag">第 0 / 12 题</div>
+    </div>
+    <div class="h1" style="margin-top:28px;">先选一下你的性别倾向</div>
+    <div class="sub" style="margin-top:10px;">用于结果校准，不会影响题目。</div>
+    <div class="gender-row" id="genderRow">
+      <div class="g-pill" data-g="男" onclick="pickGender(this)">男生</div>
+      <div class="g-pill" data-g="女" onclick="pickGender(this)">女生</div>
+      <div class="g-pill" data-g="不愿透露" onclick="pickGender(this)">不愿透露</div>
+    </div>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" id="genderNext" disabled style="opacity:.5;margin-top:20px;" onclick="startQuiz()">下一步</button>
+  </section>
+
+  <!-- 屏3：答题 -->
+  <section class="screen" id="quiz">
+    <div class="q-top">
+      <div class="q-count" id="qCount">第 1 / 12 题</div>
+      <div class="q-hint">凭直觉，不假思索</div>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" id="barFill" style="width:8%"></div></div>
+    <div class="q-title" id="qTitle"></div>
+    <div class="opts" id="opts"></div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="backBtn" onclick="prevQ()">返回上一题</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQ()">下一题</button>
+    </div>
+    <div class="foot-tip">答案没有对错，只是帮你看见自己</div>
+  </section>
+
+  <!-- 屏4：结果 -->
+  <section class="screen" id="result">
+    <div class="rs-top">
+      <div class="rs-tag">你的测评结果</div>
+      <div class="rs-name" id="rsName"></div>
+      <div class="rs-sub" id="rsSub"></div>
+    </div>
+    <div class="card">
+      <h3>你的段位维度</h3>
+      <div id="dims"></div>
+    </div>
+    <div class="card">
+      <h3>给这个段位的一句话</h3>
+      <div class="insight" id="rsInsight"></div>
+    </div>
+    <div class="acts">
+      <button class="btn btn-primary" onclick="saveImage()">保存长图 · 分享</button>
+      <button class="btn btn-ghost" onclick="copyLink()">复制结果链接</button>
+      <button class="btn btn-soft" onclick="showPraise()">好评有礼</button>
+      <button class="btn btn-ghost" onclick="retest()">再测一次</button>
+    </div>
+    <div class="foot-tip">结果仅供参考 · 段位研究所出品</div>
+  </section>
+
+  <!-- 好评弹窗 -->
+  <div class="modal-mask" id="praiseMask">
+    <div class="modal">
+      <h4>好评有礼 🎁</h4>
+      <p>在店铺给本测评一个好评，联系客服发送好评截图，即可获得 <b>1 元返现</b>。感谢你的支持！</p>
+      <button class="btn btn-primary" onclick="hidePraise()">我知道了</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ---------- 题库（本土人情世故情境，4 维度：圆融R/灵活F/分寸C/共情E，每选项 0-3 分） ----------
+const QUESTIONS = [
+  { q: "领导在饭局上突然让你敬酒，你第一反应是——", o: [
+    { t: "大方起身，借机说几句体面话", s: [3,2,3,1] },
+    { t: "悄悄示意同事代劳", s: [1,1,1,2] },
+    { t: "假装没听见，低头吃菜", s: [0,0,0,0] },
+    { t: "先安静观察，看别人怎么应对", s: [2,3,2,1] } ] },
+  { q: "同事找你帮忙，可你手头正有要紧事，你会——", o: [
+    { t: "直接说明情况并拒绝", s: [1,1,2,2] },
+    { t: "勉强答应，怕得罪人", s: [0,0,0,3] },
+    { t: "说等下有空再看", s: [1,2,1,1] },
+    { t: "先答应，再找借口推掉", s: [0,1,0,0] } ] },
+  { q: "朋友炫耀一件你并不认可的事，你——", o: [
+    { t: "附和着夸两句", s: [2,2,1,2] },
+    { t: "转移话题", s: [2,3,2,1] },
+    { t: "诚恳说出不同看法", s: [1,1,3,2] },
+    { t: "笑笑，不接话", s: [2,2,2,1] } ] },
+  { q: "饭局结账时有人抢着买单，你——", o: [
+    { t: "也抢着付", s: [2,1,1,2] },
+    { t: "说下次我请", s: [3,3,3,2] },
+    { t: "顺其自然", s: [1,1,1,1] },
+    { t: "主动提出 AA", s: [2,2,3,1] } ] },
+  { q: "群里领导发了你不太懂的内容，你——", o: [
+    { t: "默默点个赞", s: [2,1,2,1] },
+    { t: "请教其中细节", s: [3,3,2,2] },
+    { t: "转发并夸一句", s: [1,2,1,3] },
+    { t: "装作没看到", s: [0,0,0,0] } ] },
+  { q: "你帮了别人，对方却没道谢，你——", o: [
+    { t: "心里不快但不说", s: [1,1,1,1] },
+    { t: "下次就不帮了", s: [0,0,2,0] },
+    { t: "委婉地提醒一下", s: [2,3,3,2] },
+    { t: "理解对方可能忙忘了", s: [2,1,2,3] } ] },
+  { q: "亲戚当面打听你的收入，你——", o: [
+    { t: "如实说个数字", s: [1,1,3,1] },
+    { t: "含糊说“还行还行”", s: [2,2,2,1] },
+    { t: "反问他收入如何", s: [1,1,1,2] },
+    { t: "玩笑带过", s: [3,3,3,2] } ] },
+  { q: "会议上你反对同事的方案，你会——", o: [
+    { t: "私下找他沟通", s: [3,3,2,2] },
+    { t: "会上直接说", s: [1,1,3,1] },
+    { t: "先肯定，再提建议", s: [3,3,3,3] },
+    { t: "不说话，随大流", s: [0,1,0,1] } ] },
+  { q: "别人当众让你下不来台，你——", o: [
+    { t: "当场怼回去", s: [0,1,2,0] },
+    { t: "一笑而过，事后私下沟通", s: [3,3,3,2] },
+    { t: "尴尬地沉默", s: [0,0,0,0] },
+    { t: "用玩笑化解", s: [3,3,2,3] } ] },
+  { q: "朋友找你吐槽领导，你——", o: [
+    { t: "附和着一起骂", s: [0,0,1,2] },
+    { t: "听着不接话", s: [2,3,3,2] },
+    { t: "劝他别这样说", s: [2,3,3,2] },
+    { t: "转移话题", s: [2,3,2,1] } ] },
+  { q: "要给对方领导送份礼，你倾向——", o: [
+    { t: "大方送贵重的", s: [1,1,1,1] },
+    { t: "不送，保持距离", s: [1,1,2,1] },
+    { t: "送有心意的小礼", s: [3,3,3,2] },
+    { t: "看关系深浅再定", s: [2,3,3,1] } ] },
+  { q: "你做错事被当众指出，你——", o: [
+    { t: "急着辩解", s: [0,1,1,0] },
+    { t: "认错并说怎么改", s: [3,3,3,3] },
+    { t: "沉默不语", s: [1,0,1,1] },
+    { t: "开个玩笑带过", s: [2,2,2,2] } ] }
+];
+
+const DIMS = [
+  { key: "R", label: "生分 ← 圆融", max: 36 },
+  { key: "F", label: "刻板 ← 灵活", max: 36 },
+  { key: "C", label: "直率 ← 分寸", max: 36 },
+  { key: "E", label: "自我 ← 共情", max: 36 }
+];
+
+const DEMO_PASSWORDS = ["renshi388", "duanwei888", "ceshi2026"];
+
+let state = { gender: "", current: 0, answers: new Array(12).fill(-1), pwd: "" };
+
+// ---------- 密码 ----------
+function getUsage() { try { return JSON.parse(localStorage.getItem("ceshi_usage") || "{}"); } catch (e) { return {}; } }
+function incUsage(pwd) { const u = getUsage(); u[pwd] = (u[pwd] || 0) + 1; localStorage.setItem("ceshi_usage", JSON.stringify(u)); }
+function checkPwd() {
+  const v = document.getElementById("pwdInput").value.trim();
+  const err = document.getElementById("pwdErr");
+  if (!v) { err.textContent = "请输入测评密码"; return; }
+  if (!DEMO_PASSWORDS.includes(v)) { err.textContent = "密码不正确，请核对后重试"; return; }
+  if ((getUsage()[v] || 0) >= 3) { err.textContent = "该密码已用完 3 次，请使用新密码"; return; }
+  state.pwd = v;
+  err.textContent = "";
+  show("gender");
+}
+
+// ---------- 性别 ----------
+function pickGender(el) {
+  document.querySelectorAll("#genderRow .g-pill").forEach(p => p.classList.remove("on"));
+  el.classList.add("on");
+  state.gender = el.dataset.g;
+  const btn = document.getElementById("genderNext");
+  btn.disabled = false; btn.style.opacity = "1";
+}
+
+// ---------- 答题 ----------
+function startQuiz() {
+  incUsage(state.pwd);
+  state.current = 0; state.answers = new Array(12).fill(-1);
+  renderQ();
+  show("quiz");
+}
+function renderQ() {
+  const i = state.current;
+  document.getElementById("qCount").textContent = "第 " + (i + 1) + " / 12 题";
+  document.querySelector("#gender .tag").textContent = "第 " + i + " / 12 题";
+  document.getElementById("barFill").style.width = ((i + 1) / 12 * 100) + "%";
+  document.getElementById("qTitle").textContent = QUESTIONS[i].q;
+  const opts = document.getElementById("opts"); opts.innerHTML = "";
+  const keys = ["A", "B", "C", "D"];
+  QUESTIONS[i].o.forEach((opt, idx) => {
+    const d = document.createElement("div");
+    d.className = "opt" + (state.answers[i] === idx ? " on" : "");
+    d.innerHTML = '<div class="k">' + keys[idx] + '</div><div>' + opt.t + '</div>';
+    d.onclick = () => { state.answers[i] = idx; renderQ(); };
+    opts.appendChild(d);
+  });
+  document.getElementById("backBtn").style.opacity = i === 0 ? ".5" : "1";
+  document.getElementById("nextBtn").textContent = i === 11 ? "查看结果" : "下一题";
+}
+function prevQ() { if (state.current > 0) { state.current--; renderQ(); } }
+function nextQ() {
+  if (state.answers[state.current] === -1) { toast("请先选择一个选项"); return; }
+  if (state.current < 11) { state.current++; renderQ(); }
+  else computeResult();
+}
+
+// ---------- 结果 ----------
+function computeResult() {
+  const sum = { R: 0, F: 0, C: 0, E: 0 };
+  state.answers.forEach((a, qi) => {
+    if (a < 0) return;
+    const s = QUESTIONS[qi].o[a].s;
+    sum.R += s[0]; sum.F += s[1]; sum.C += s[2]; sum.E += s[3];
+  });
+  const total = sum.R + sum.F + sum.C + sum.E;
+  let name, sub, insight;
+  if (total >= 120) {
+    name = "八面玲珑 · 人情世故九段";
+    sub = "人群前 5% · 把场面话说到心坎里";
+    insight = "你不是会来事，而是把别人的处境先想了一步。真正的高段位不是讨好，是让对方舒服的同时，自己也不委屈。";
+  } else if (total >= 90) {
+    name = "进退有度 · 七段";
+    sub = "大多拿捏得当，偶有摇摆";
+    insight = "你大多时候分寸正好，只是偶尔在“太客气”和“太直白”之间摇摆。补上一点预判，你就稳了。";
+  } else if (total >= 60) {
+    name = "真诚直率 · 五段";
+    sub = "本性可贵，尚需磨炼";
+    insight = "你的真诚很珍贵，但有时直来直去会无意中让人下不来台。试着在开口前多想半步。";
+  } else {
+    name = "初出茅庐 · 三段";
+    sub = "带着率真，正在入门";
+    insight = "你还带着点愣头青的率真，人情世故对你来说是门新功课。别急，先把“看场合说话”练熟。";
+  }
+  const dimsHtml = DIMS.map(d => {
+    const pct = Math.round(sum[d.key] / d.max * 100);
+    return '<div class="dim"><div class="dim-head"><span class="l">' + d.label + '</span><span class="r">→ ' + pct + '%</span></div><div class="dim-bar"><div class="dim-fill" style="width:' + pct + '%"></div></div></div>';
+  }).join("");
+  document.getElementById("rsName").textContent = name;
+  document.getElementById("rsSub").textContent = sub;
+  document.getElementById("dims").innerHTML = dimsHtml;
+  document.getElementById("rsInsight").textContent = insight;
+  window._result = { name, sub, insight, sum, gender: state.gender };
+  show("result");
+}
+
+function copyLink() {
+  const url = location.origin + location.pathname + "?r=" + encodeURIComponent(window._result.name);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast("结果链接已复制"), () => fallbackCopy(url));
+  } else fallbackCopy(url);
+}
+function fallbackCopy(t) {
+  const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand("copy"); toast("结果链接已复制"); } catch (e) { toast("复制失败，请手动复制"); }
+  document.body.removeChild(ta);
+}
+
+// ---------- canvas 长图 ----------
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function wrapText(ctx, text, x, y, maxW, lh) {
+  const chars = text.split("");
+  let line = "";
+  for (let i = 0; i < chars.length; i++) {
+    const test = line + chars[i];
+    if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, y); line = chars[i]; y += lh; }
+    else line = test;
+  }
+  if (line) { ctx.fillText(line, x, y); y += lh; }
+  return y;
+}
+function saveImage() {
+  const r = window._result; if (!r) return;
+  const W = 750, H = 1120;
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#FFF4F7"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#fff"; roundRect(ctx, 30, 30, W - 60, H - 60, 28); ctx.fill();
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#F56A8C"; ctx.font = "bold 38px sans-serif";
+  ctx.fillText("你的人情世故段位", W / 2, 115);
+  ctx.fillStyle = "#1A1A1A"; ctx.font = "bold 54px sans-serif";
+  ctx.fillText(r.name, W / 2, 195);
+  ctx.fillStyle = "#8A8A8A"; ctx.font = "26px sans-serif";
+  ctx.fillText(r.sub, W / 2, 245);
+  let y = 310;
+  DIMS.forEach(d => {
+    const pct = Math.round(r.sum[d.key] / d.max * 100);
+    ctx.textAlign = "left"; ctx.fillStyle = "#3A3A3A"; ctx.font = "24px sans-serif";
+    ctx.fillText(d.label, 70, y);
+    ctx.fillStyle = "#F0F0F2"; roundRect(ctx, 70, y + 32, W - 140, 16, 8); ctx.fill();
+    ctx.fillStyle = "#F56A8C"; roundRect(ctx, 70, y + 32, (W - 140) * pct / 100, 16, 8); ctx.fill();
+    ctx.textAlign = "right"; ctx.fillStyle = "#F089A2"; ctx.font = "24px sans-serif";
+    ctx.fillText(pct + "%", W - 70, y + 20);
+    y += 88;
+  });
+  ctx.textAlign = "left"; ctx.fillStyle = "#1A1A1A"; ctx.font = "bold 28px sans-serif";
+  ctx.fillText("给这个段位的一句话", 70, y); y += 46;
+  ctx.fillStyle = "#5A5A5A"; ctx.font = "26px sans-serif";
+  y = wrapText(ctx, r.insight, 70, y, W - 140, 42);
+  ctx.textAlign = "center"; ctx.fillStyle = "#C9C9C9"; ctx.font = "22px sans-serif";
+  ctx.fillText("段位研究所 · 凭密码测试", W / 2, H - 48);
+  const a = document.createElement("a");
+  a.download = "人情世故段位.png";
+  a.href = c.toDataURL("image/png");
+  a.click();
+  toast("长图已生成，请保存到相册/文件");
+}
+
+function showPraise() { document.getElementById("praiseMask").classList.add("show"); }
+function hidePraise() { document.getElementById("praiseMask").classList.remove("show"); }
+function retest() {
+  state = { gender: "", current: 0, answers: new Array(12).fill(-1), pwd: "" };
+  document.getElementById("pwdInput").value = "";
+  document.getElementById("pwdErr").textContent = "";
+  document.querySelectorAll("#genderRow .g-pill").forEach(p => p.classList.remove("on"));
+  const btn = document.getElementById("genderNext"); btn.disabled = true; btn.style.opacity = ".5";
+  show("pwd");
+}
+
+// ---------- 工具 ----------
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+</script>
+</body>
+</html>
